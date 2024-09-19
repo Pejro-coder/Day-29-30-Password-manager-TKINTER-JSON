@@ -1,13 +1,14 @@
 from tkinter import *
 from tkinter import messagebox
 import random
+import json
 
 
 # ---------------------------- PASSWORD GENERATOR ------------------------------- #
 def generate_password():
-    letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
-               'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R',
-               'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
+    letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u',
+               'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+               'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
     numbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
     symbols = ['!', '#', '$', '%', '&', '(', ')', '*', '+']
 
@@ -15,18 +16,21 @@ def generate_password():
     nr_symbols = random.randint(2, 4)
     nr_numbers = random.randint(2, 4)
 
-    password_letters = [random.choice(letters) for char in range(nr_letters)]
-    password_numbers = [random.choice(numbers) for number in range(nr_numbers)]
-    password_symbols = [random.choice(symbols) for symbol in range(nr_symbols)]
+    password_letters = [random.choice(letters) for _ in range(nr_letters)]
+    password_numbers = [random.choice(numbers) for _ in range(nr_numbers)]
+    password_symbols = [random.choice(symbols) for _ in range(nr_symbols)]
 
     password_list = password_letters + password_numbers + password_symbols
     random.shuffle(password_list)
-
     password = "".join(password_list)
-    if len(password_entry.get()) != 0:
+
+    # Clear input fields if they are not empty, before new password generation
+    if len(password_entry.get()) or len(password_confirmation.get()) > 0:
         password_entry.delete(0, END)
+        password_confirmation.delete(0, END)
 
     password_entry.insert(0, password)
+    password_confirmation.insert(0, password)
 
 
 # ---------------------------- SAVE PASSWORD ------------------------------- #
@@ -35,6 +39,12 @@ def save():
     email_info = email_username_entry.get()
     password_info = password_entry.get()
     password_confirm_info = password_confirmation.get()
+    new_data = {
+        website_info: {
+            "email": email_info,
+            "password": password_info,
+        }
+    }
 
     if len(website_info) == 0 or len(password_info) == 0:
         messagebox.showinfo(title="Check", message="Please don't leave any fields empty.")
@@ -44,11 +54,21 @@ def save():
         decision = messagebox.askokcancel(title="Check", message=f"Website: {website_info}\nPassword: {password_info}")
 
         if decision:
-            with open("secret_file.txt", "a") as file:
-                file.write(f"{website_info} | {email_info} | {password_info}\n")
+            try:
+                with open("secret_file.json", "r") as data_file:
+                    data = json.load(data_file)
+            except FileNotFoundError:
+                with open("secret_file.json", "w") as data_file:
+                    json.dump(new_data, data_file, indent=4)
+            else:
+                data = json.load(data_file)
+                data.update(new_data)
+                with open("secret_file.json", "w") as data_file:
+                    json.dump(data, data_file, indent=4)
 
             website_entry.delete(0, END)
             password_entry.delete(0, END)
+            password_confirmation.delete(0, END)
 
 
 # ---------------------------- UI SETUP ------------------------------- #
@@ -103,6 +123,5 @@ password_confirmation.config(width=25)
 # Row 6 - Add button
 add_button = Button(text="Add", width=29, command=save)
 add_button.grid(column=1, row=5, columnspan=2)
-
 
 window.mainloop()
