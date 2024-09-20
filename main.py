@@ -72,18 +72,24 @@ def save():
 
 # ---------------------- SEARCH FUNCTIONALITY ------------------------- #
 def search_password():
-    data = website_entry.get()
-    print(data)
-    with open("secret_file.json", "r") as data_file:
-        saved_data_dict = json.load(data_file)
-        if data in saved_data_dict:
-            password = saved_data_dict[data]["password"]
-            print(saved_data_dict)
-            print(data)
-            print(saved_data_dict.get(data))
+    website = website_entry.get()
+    try:
+        with open("secret_file.json", "r") as data_file:
+            saved_data_dict = json.load(data_file)
+    except FileNotFoundError as error:
+        messagebox.showinfo(title="Saved website", message=f"'{website}' was not found")
+        print(error)
+        # Create new file with an empty dictionary if there is no file existing
+        new_data = {}
+        with open("secret_file.json", "w") as data_file:
+            json.dump(new_data, data_file)
+    else:
+        if website in saved_data_dict:
+            password = saved_data_dict[website]["password"]
+            email = saved_data_dict[website]["email"]
+            messagebox.showinfo(title="Saved websites", message=f"Website: {website}\nEmail: {email}\nPassword: {password}")
         else:
-            print("no data")
-
+            messagebox.showinfo(title="Saved website", message=f"'{website}' was not found")
 
 
 # ---------------------------- UI SETUP ------------------------------- #
