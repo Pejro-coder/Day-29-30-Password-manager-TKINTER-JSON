@@ -61,7 +61,6 @@ def save():
                 with open("secret_file.json", "w") as data_file:
                     json.dump(new_data, data_file, indent=4)
             else:
-                data = json.load(data_file)
                 data.update(new_data)
                 with open("secret_file.json", "w") as data_file:
                     json.dump(data, data_file, indent=4)
@@ -71,6 +70,22 @@ def save():
             password_confirmation.delete(0, END)
 
 
+# ---------------------- SEARCH FUNCTIONALITY ------------------------- #
+def search_password():
+    data = website_entry.get()
+    print(data)
+    with open("secret_file.json", "r") as data_file:
+        saved_data_dict = json.load(data_file)
+        if data in saved_data_dict:
+            password = saved_data_dict[data]["password"]
+            print(saved_data_dict)
+            print(data)
+            print(saved_data_dict.get(data))
+        else:
+            print("no data")
+
+
+
 # ---------------------------- UI SETUP ------------------------------- #
 window = Tk()
 window.title("Password manager")
@@ -78,19 +93,24 @@ window.config(padx=50, pady=50)
 
 # Row 1 - Logo
 canvas = Canvas(width=200, height=200, highlightthickness=0)
-logo_image = PhotoImage(file="logo.png")
+# logo_image = PhotoImage(file="logo.png")
+logo_image = PhotoImage(file="")
 canvas.create_image(100, 100, image=logo_image)
 canvas.grid()
 canvas.grid_configure(row=0, column=0, columnspan=3)
 
-# Row 2 - Website
+# Row 2 - Website, Search
 website_label = Label(text="Website:", anchor='w', width=15)
 website_label.grid(column=0, row=1)
 
 website_entry = Entry()
-website_entry.grid(column=1, row=1, columnspan=2)
+website_entry.grid(column=1, row=1, sticky="w")
 website_entry.focus()
-website_entry.config(width=35)
+website_entry.configure(width=24)
+
+search_button = Button(text="Search", command=search_password)
+search_button.grid(column=2, row=1)
+search_button.configure(width=7)
 
 # Row 3 - Email/Username
 email_username_label = Label(text="Email/Username:", anchor='w', width=15)
@@ -106,8 +126,8 @@ password_label = Label(text="Password:", anchor='w', width=15)
 password_label.grid(column=0, row=3)
 
 password_entry = Entry()
-password_entry.grid(column=1, row=3)
-password_entry.config(width=25)
+password_entry.grid(column=1, row=3, sticky="w")
+password_entry.config(width=24)
 
 password_button = Button(text="Generate", command=generate_password)
 password_button.grid(column=2, row=3)
@@ -117,8 +137,8 @@ password_confirm_label = Label(text="Confirm password:", anchor='w', width=15)
 password_confirm_label.grid(column=0, row=4)
 
 password_confirmation = Entry()
-password_confirmation.grid(column=1, row=4)
-password_confirmation.config(width=25)
+password_confirmation.grid(column=1, row=4, sticky="w")
+password_confirmation.config(width=24)
 
 # Row 6 - Add button
 add_button = Button(text="Add", width=29, command=save)
